@@ -31,10 +31,11 @@ test('logs in and logs out successfully', async ({ page }) => {
 });
 
 
-test('login page should display Welcome Back', async ({ page }) => {
+
+test('login page should display login button', async ({ page }) => {
   await page.goto('/');
 
   await expect(
-    page.getByText('Welcome Back', { exact: true })
+    page.getByRole('button', { name: 'Log in' })
   ).toBeVisible();
 });
