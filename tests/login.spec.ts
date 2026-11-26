@@ -29,3 +29,13 @@ test('logs in and logs out successfully', async ({ page }) => {
   await page.getByRole('button', { name: 'Log out' }).click();
   await expect(page.getByRole('button', { name: 'Log in' })).toBeVisible();
 });
+
+
+
+test('login page should display login button', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(
+    page.getByRole('button', { name: 'Log in' })
+  ).toBeVisible();
+});
