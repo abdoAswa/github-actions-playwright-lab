@@ -1,3 +1,4 @@
+
 name: Playwright CI
 
 on:
@@ -9,7 +10,6 @@ on:
 
 permissions:
   contents: read
-
 
 jobs:
   code-quality:
@@ -26,44 +26,51 @@ jobs:
           node --check public/app.js
 
   e2e-tests:
+    name: e2e-tests (${{ matrix.browser }})
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
       - name: Run Playwright tests
-        run: npx playwright test
+        run: npx playwright test --project=${{ matrix.browser }}
+
       - name: Upload HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.browser }}
           path: playwright-report/
           if-no-files-found: ignore
           retention-days: 7
+
       - name: Upload test results
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ matrix.browser }}
           path: test-results/
           if-no-files-found: ignore
           retention-days: 7
-
 
   final-validation:
     name: Final Validation
@@ -72,5 +79,4 @@ jobs:
 
     steps:
       - name: Confirm pipeline success
-        run: echo "Code Quality and Playwright tests passed!"
-
+        run: echo "All code quality and browser tests passed!"
