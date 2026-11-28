@@ -10,7 +10,21 @@ on:
 permissions:
   contents: read
 
+
 jobs:
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check server.js
+          node --check public/app.js
+
   e2e-tests:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -49,3 +63,14 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+
+  final-validation:
+    name: Final Validation
+    needs: [code-quality, e2e-tests]
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Confirm pipeline success
+        run: echo "Code Quality and Playwright tests passed!"
+
